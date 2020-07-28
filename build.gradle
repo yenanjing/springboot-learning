@@ -1,0 +1,108 @@
+plugins {
+	id 'org.springframework.boot' version '2.3.1.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+def jarName = 'project.jar'
+//sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+	implementation('mysql:mysql-connector-java')
+	compileOnly('org.projectlombok:lombok')
+
+	/**数据库驱动*/
+//	compile libs["postgresql"]
+
+//	compile libs["mybatis-spring-boot-starter"]
+
+	/*热部署*/
+//	compile libs["spring-boot-devtools"]
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+}
+
+test {
+	useJUnitPlatform()
+}
+
+apply plugin: 'idea'
+//apply plugin: 'com.palantir.docker'
+
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+sourceSets {
+	integrationTest {
+		java {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/integrationTest/java')
+		}
+		resources.srcDir file('src/integrationTest/resources')
+	}
+
+	functionalTest {
+		java {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/functionalTest/java')
+		}
+		resources.srcDir file('src/functionalTest/resources')
+	}
+}
+
+idea {
+	module {
+		testSourceDirs += project.sourceSets.integrationTest.java.srcDirs
+		testResourceDirs += project.sourceSets.integrationTest.resources.srcDirs
+		scopes.TEST.plus += [ configurations.integrationTestCompile ]
+	}
+}
+
+configurations {
+	integrationTestCompile.extendsFrom testCompile
+	integrationTestRuntime.extendsFrom testRuntime
+	functionalTestCompile.extendsFrom testCompile
+	functionalTestRuntime.extendsFrom testRuntime
+}
+
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation "org.springframework.boot:spring-boot-starter-redis:1.3.5.RELEASE"
+	testImplementation 'org.testcontainers:postgresql:1.14.2'
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+//	testCompile "org.testcontainers:testcontainers:1.14.1"
+//	classpath 'gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.19.2'
+//	integrationTestCompile sourceSets.main.runtimeClasspath
+//	integrationTestCompile sourceSets.test.runtimeClasspath
+
+//	functionalTestCompile sourceSets.main.runtimeClasspath
+//	functionalTestCompile sourceSets.test.runtimeClasspath
+}
+
+
+bootJar {
+	archiveName(jarName)
+}
